@@ -19,28 +19,5 @@ namespace SocialNews.Models
                 return _instance.Value;
             }
         }
-
-        //public void SpreadMessage(string message)
-        //{
-        //    BroadCastMessage(message);
-        //}
-
-        //private void BroadCastMessage(string message)
-        //{
-        //    var clients = Hub.GetClients<SocialHub>();
-
-        //    clients.newMessage(message);
-        //    //clients.isAlive();
-        //}
-
-        //public void GetClients()
-        //{
-        //    System.Web.Script.Serialization.JavaScriptSerializer oSerializer = new System.Web.Script.Serialization.JavaScriptSerializer();
-        //    string sJSON = oSerializer.Serialize(Clients);
-
-        //    var clients = Hub.GetClients<SocialHub>();
-        //    clients.userList(sJSON);
-        //}
-
     }
 }

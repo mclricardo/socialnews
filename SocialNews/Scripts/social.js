@@ -277,7 +277,7 @@ function setupHubClient() {
             window.wallViewModel.isSignalREnabled(true);
         }
     }).fail(function () {
-        //alert('connection failed');
+        alert('SignalR connection failed!');
     });
 
     socialHubClient.updateLike = function (messageId, personWhoLiked) {

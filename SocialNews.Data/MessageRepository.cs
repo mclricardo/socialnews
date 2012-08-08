@@ -1,7 +1,4 @@
-﻿using Db4objects.Db4o;
-using Db4objects.Db4o.Linq;
-using Db4objects.Db4o.Query;
-using SocialNews.Domain.Model;
+﻿using SocialNews.Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;

@@ -90,6 +90,8 @@
             configure everything from scratch. The code-first framework of your choice will have conventions from which your model will benefit while generating
             a database model.</p>
 
+            <h4><a name="Fluent">FluentNHibernate</a></h4>
+
             <p>Once we decide to use code first, we can pick any Object-Relational Mapping (<a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>) 
             framework we want. On of the options is Microsoft's <a href="http://www.google.com/url?sa=t&rct=j&q=entity%20framework&source=web&cd=1&ved=0CFYQFjAA&url=http%3A%2F%2Fmsdn.microsoft.com%2Fen-us%2Fdata%2Fef.aspx&ei=AW8VUJjPNsLc6wHvs4GIDQ&usg=AFQjCNGnRYM3tghOlk7YE3qY8RyjXpulaQ">
             Entity Framework</a>, which has been <a href="http://www.hanselman.com/blog/EntityFrameworkMagicUnicornAndMuchMoreIsNowOpenSourceWithTakeBacks.aspx">released 
@@ -100,6 +102,8 @@
             the ability to create mappings via fluent, strongly-typed code. This enables you to check more quickly for errors, since XML files are not evaluated
             by a compiler. Also, through fluent mapping you can avoid the verbosity that is inherent to XML configuration files. Another big advantage of
             FluentNHibernate is that you can create abstract base classes from which your classes inherit, so you can write more concise code and avoid repetition.</p>
+
+            <h4><a name="SQLCe">SQL Server Compact</a></h4>
 
             <p>The last piece of the data layer is our choice for database management system. The most obvious choice would be Sql Server. Sql
             Server would work great if installed on a separated server instance, But given the fact that: 1) we would like to include the database
@@ -114,6 +118,8 @@
 
             <p>Summing up, we will use FluentNHibernate to map our object model to the relational database. Sql Server Compact will then manage a single
             .sdf file in our App_Data folder, allowing us to use Sql Server Management Studio to easily verify the contents of the database.</p>
+
+            <h4><a name="DataModel">Data Model</a></h4>
 
             <p>The Social News application relies on the following simple model:</p>
 
@@ -232,6 +238,8 @@ public class Message :  Entity
 }
             </pre>
 
+            <h4><a name="Mapping">Mapping</a></h4>
+
             <p>Once we have our model classes in place, we now start creating the NHibernate mappings for them. Remember that
             we are not creating any XML configuration for this, because it's all in code. First, we implement an abstract map class
             from which the other map classes will inherit. The <class>BaseMap</class> class will map only the base entity class
@@ -314,6 +322,8 @@ public class MessageMap : BaseMap&lt;Message&gt;
     }
 }
             </pre>
+
+            <h4><a name="SchemaGeneration">Schema Generation</a></h4>
 
             <p>Now that we already have our model and mappings, we must create the database from it. The configuragion in web.config for Sql Server Compact
             is not that different from the configuration from Sql Server:</p>
@@ -454,6 +464,8 @@ public class MessageMap : BaseMap&lt;Message&gt;
             view. It also automatically means that you can reuse the same view model in different types of views. Another big implication is that you don't have to manipulate
             DOM elements from your javascript code anymore. I'm sure you will agree with me that this is always painful (no matter which javascript framework you
             use - Prototype, jQuery, MooTools, etc.), especially when the UI is complex.</p>
+
+            <h4><a name="KnockoutJsHandsOn">KnockoutJs Hands On</a></h4>
 
             <p>Now let's see how our project takes advantage of KnockoutJs: first, our home page at <b>Index.cshtml</b> has a reference to <b>KnockoutJs</b>
             javascript file: </p>
@@ -611,6 +623,9 @@ threadConversationMessageId="5"&gt;&lt;&gt;
             object has the value <b>true</b>. The special name <b>$parent</b> allows you to access <b>ancestors</b>, that is, when KnockoutJs
             is rendering a <class>Message</class> inside a list of messages, the <b>$parent.isLoading</b> name will refer to the <class>isLoading</class>
             property of the object that actually contains the list of messages.</p>
+
+            <p>Now we can compare the fake HTML with the final version of the view, and it becomes easier to spot where the KnockoutJs bindings
+            were inserted:</p>
 
 <table width="780">
     <tr>
@@ -810,7 +825,199 @@ threadConversationMessageId="5"&gt;&lt;&gt;
             another long polling connection behind the scenes, which is transparent for both the client and server involved. Obviously is less efficient than 
             WebSockets, but works great and allows cross-browser applications.</p>
 
-            <p></p>
+            <h4><a name="Hub">Hub</a></h4>
+
+            <p>SignalR uses the concept of <class>Hub</class> to bring client-server communication methods to a central point. When you use SignalR, you will
+            inevitably need to create one or more hubs classes by inheriting from the base <class>Hub</class> class:</p>
+
+<pre lang="cs">
+namespace SocialNews.Hubs
+{
+    public class SocialHub : Hub
+    {
+        .
+        .
+        .
+    }
+}
+</pre>
+
+            <h4><a name="ClientCallingTheServer">Client Calling the Server</a></h4>
+
+            <p>You will find it interesting the fact that all methods you put inside a <class>Hub</class> will be automatically exposed and available 
+            for the client side (javascript) code. As we are going to see later, all you have to do is to call the javascript method with the same
+            on the SignalR javascript object.</p>
+
+<pre lang="cs">
+    public class SocialHub : Hub
+    {
+        public void SendLikeToServer(int messageId)
+        {
+            ...
+        }
+
+        public void SendUnlikeToServer(int messageId)
+        {
+            ...
+        }
+
+        public void SendCommentToServer(int? parentMessageId, string comment)
+        {
+            ...
+        }
+
+        public void Join(string name)
+        {
+            ...
+        }
+    }
+</pre>
+
+            <h4><a name="ServerCallingTheClient">Server Calling the Client</a></h4>
+
+            <p>Of course you can also make calls from server to clients, by using the <class>Clients</class> class, a dynamic object that represents all clients 
+            connected to the Hub.</p>
+
+            <p>The following code illustrates what happens when some user "likes" a comment: first, the javascript code calls the <class>sendLikeToServer</class>
+            method of <class>socialHubClient</class> object, passing the message Id. When it reaches the server, it is routed to the <class>SocialHub</class>
+            class and invokes the <class>SendLikeToServer</class> method. Then the "like" information is persisted to the database, while the dynamic method
+            <class>updateLike</class> is called on the dynamic object <class>Clients</class>, and thus the "like" information is broadcast to all online 
+            clients:</p>
+
+<pre lang="cs">
+    public void SendLikeToServer(int messageId)
+    {
+        var messageRepository = new MessageRepository();
+        messageRepository.AddLike(messageId, Context.User.Identity.Name, (author) =&gt;
+            {
+                Clients.updateLike(messageId, new {Id = author.Id, Name = author.Name});
+            });
+    }
+</pre>
+
+            <h4><a name="Joining">Joining the Conversation</a></h4>
+
+            <p>As soon as the user signs in, it must "join" the application, and this way the client is telling the server about its availability, and so
+            it is enlisted to receive new broadcasts. The join part is done via javascript. Notice that the client can only join after the hub connection
+            has been established: </p>
+
+<pre lang="javascript">
+function setupHubClient() {
+    socialHubClient = $.connection.socialHub;
+
+    // Start the connection
+    $.connection.hub.start(function () {
+        socialHubClient.join(userInfo.Name);
+    }).done(function () {
+        window.isSignalREnabled = true;
+        if (window.wallViewModel) {
+            window.wallViewModel.isSignalREnabled(true);
+        }
+    }).fail(function () {
+        alert('SignalR connection failed!');
+    });
+    .
+    .
+    .
+</pre>
+
+            <h4><a name="LikingAMessage">Liking a Message</a></h4>
+
+            <p>The process of "liking" a message is simple: after the user clicks the link, the <class>addLike</class> method of the
+            <class>Message</class> object is called...</p>
+
+<pre lang="javascript">
+    &lt;a href="javascript:void(0);" class="post-info-link like" 
+    data-bind="style: { display: likedByThisUser() ? 'none' : ''},
+    click: addLike"&gt;Like&lt;/a&gt;            
+</pre>
+
+            <p>...then the client must send the like information to the server (that is, the SignalR hub)...</p>
+
+<pre lang="javascript">
+    self.addLike = function () {
+        socialHubClient.sendLikeToServer(self.id());
+    } .bind(self);
+</pre>
+
+            <p>...which in turn persists the like information in the database and broadcasts the data of like information to all enlisted
+            users...</p>
+
+<pre lang="cs">
+    public void SendLikeToServer(int messageId)
+    {
+        var messageRepository = new MessageRepository();
+        messageRepository.AddLike(messageId, Context.User.Identity.Name, (author) =&gt;
+            {
+                Clients.updateLike(messageId, new {Id = author.Id, Name = author.Name});
+            });
+    }
+</pre>
+
+            <p>...and now the information is sent to the <class>updateLike</class> method of the <class>socialHubClient</class> object,
+            which in turn looks for the affected message and updates the list of people who liked that post with this new "like" information.
+            Notice that thanks to the KnockoutJs bindings, we don't need to mess with HTML directly to update the view:</p>
+
+<pre lang="javascript">
+    socialHubClient.updateLike = function (messageId, personWhoLiked) {
+        window.wallViewModel.findMessageAndAct(messageId, wallViewModel, function (message) {
+            message.likes.push({
+                id: personWhoLiked.Id,
+                name: personWhoLiked.Name
+            });
+        });
+    };
+</pre>
+
+            <p>The list of people who liked a specific post is given by the <class>likeSummary</class> method. We see this method
+            defined in some of the KnockoutJs bindings, like this:</p>
+
+<pre lang="html">
+    &lt;!-- ko if: likes().length &gt; 0 --&gt;
+        &lt;div class="likeInfo" 
+        data-bind="text: likeSummary,
+        style: {display: likeSummary().trim().length &gt; 0 ? '' : 'none'}"&gt;
+        &lt;/div&gt;
+    &lt;!-- /ko --&gt;
+</pre>
+
+            <p>The <class>likeSummary</class> is implemented on the <class>Message</class> class as a special kind of object called
+            <b>computed</b>. A computed method works like an <b>observable</b>, but instead of holding a value, it is evaluated again
+            whenever it is required by KnockoutJs. This is very handy in our case because we want to present a human-readable list of
+            users who liked a specific post:</p>
+
+<pre lang="javascript">
+    self.likeSummary = ko.computed(function () {
+        var summary = '';
+        var sortedLikes = self.likes.sort(function (a, b) {
+            var expA = (a.Id == userInfo.Id ? -1 : 1);
+            var expB = (b.Id == userInfo.Id ? -1 : 1);
+            return expA &lt; expB ? -1 : 1;
+        })
+
+        $(sortedLikes).each(function (index, author) {
+            if (summary.length &gt; 0) {
+                if (index == likes.length - 1) {
+                    summary += ' and ';
+                }
+                else {
+                    summary += ', ';
+                }
+            }
+
+            if (author.name == userInfo.Name) {
+                summary += 'You';
+            }
+            else {
+                summary += author.name;
+            }
+        });
+        if (self.likes().length &gt; 0) {
+            summary += ' liked this';
+        }
+        return summary;
+    });
+</pre>
 
             <h2><a name="FinalConsiderations">Final Considerations</a></h2>
 
