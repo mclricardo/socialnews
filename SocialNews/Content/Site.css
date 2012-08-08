@@ -1,0 +1,593 @@
+﻿/*----------------------------------------------------------
+The base color for this template is #5c87b2. If you'd like
+to use a different color start by replacing all instances of
+#5c87b2 with your new color.
+----------------------------------------------------------*/
+body {
+    background-color: #fff;
+    font-size: 0.8em;
+    font-family: Segoe UI,"lucida grande",tahoma,verdana,arial,sans-serif;
+    margin: 0;
+    padding: 0;
+    color: #000;
+}
+
+/*
+a:link {
+    color: #034af3;
+    text-decoration: underline;
+}
+*/
+
+a:visited {
+    color: #505abc;
+}
+
+a:hover {
+    color: #1d60ff;
+    text-decoration: none;
+}
+
+a:active {
+    color: #12eb87;
+}
+
+p, ul {
+    margin-bottom: 20px;
+    line-height: 1.6em;
+}
+
+header,
+footer,
+nav,
+section {
+    display: block;
+}
+
+/* HEADINGS   
+----------------------------------------------------------*/
+h1, h2, h3, h4, h5, h6 {
+    font-size: 1.5em;
+    color: #000;
+}
+
+h1 
+{
+    font-size: 2em;
+    padding-bottom: 0;
+    margin-bottom: 0;
+}
+
+h2 {
+    padding: 0 0 10px 0;
+}
+
+h3 {
+    font-size: 1.2em;
+}
+
+h4 {
+    font-size: 1.1em;
+}
+
+h5, h6 {
+    font-size: 1em;
+}
+
+/* PRIMARY LAYOUT ELEMENTS   
+----------------------------------------------------------*/
+
+/* you can specify a greater or lesser percentage for the 
+page width. Or, you can specify an exact pixel width. */
+.page {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+header, #header {
+    position: relative;
+    margin-bottom: 0px;
+    color: #000;
+    padding: 0;
+}
+
+header h1, #header h1 {
+    font-weight: bold;
+    padding: 5px 0;
+    margin: 0;
+    color: #000;
+    border: none;
+    line-height: 2em;
+}
+
+#main {
+    padding: 0 0 0 0;
+    background-color: #fff;
+    border-radius: 4px 0 0 0;
+    -webkit-border-radius: 4px 0 0 0;
+    -moz-border-radius: 4px 0 0 0;
+    margin-left: 150px;
+}
+
+footer, 
+#footer {
+    background-color: #fff;
+    color: #999;
+    padding: 10px 0;
+    text-align: center;
+    line-height: normal;
+    margin: 0 0 30px 0;
+    font-size: .9em;
+    border-radius: 0 0 4px 4px;
+    -webkit-border-radius: 0 0 4px 4px;
+    -moz-border-radius: 0 0 4px 4px;
+}
+
+/* TAB MENU   
+----------------------------------------------------------*/
+ul#menu {
+    padding: 0 0 2px;
+    position: relative;
+    margin: 0;
+    text-align: right;
+}
+
+ul#menu li {
+    display: block;
+    list-style: none;
+}
+
+ul#menu li#greeting {
+    padding: 10px 20px;
+    font-weight: bold;
+    text-decoration: none;
+    line-height: 2.8em;
+}
+
+ul#menu li a {
+    padding: 10px 20px;
+    font-weight: normal;
+    text-decoration: none;
+    line-height: 2.8em;
+    color: #000;
+    border-radius: 4px 4px 0 0;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+}
+
+ul#menu li a:hover {
+    background-color: #fff;
+    text-decoration: none;
+}
+
+ul#menu li a:active {
+    background-color: #a6e2a6;
+    text-decoration: none;
+}
+
+ul#menu li.selected a {
+    background-color: #fff;
+    color: #000;
+}
+
+/* FORM LAYOUT ELEMENTS   
+----------------------------------------------------------*/
+
+fieldset {
+    border: 1px solid #ddd;
+    padding: 0 1.4em 1.4em 1.4em;
+    margin: 0 0 1.5em 0;
+}
+
+legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+input[type="text"], 
+input[type="password"] {
+    border: 1px solid #ccc;
+    padding: 2px;
+    font-size: 1.2em;
+    color: #444;
+    width: 200px;
+}
+
+select {
+    border: 1px solid #ccc;
+    padding: 2px;
+    font-size: 1.2em;
+    color: #444;
+}
+
+input[type="submit"] {
+    font-size: 1.2em;
+    padding: 5px;
+}
+
+/* TABLE
+----------------------------------------------------------*/
+
+table {
+    border: solid 1px #e8eef4;
+    border-collapse: collapse;
+}
+
+table td {
+    padding: 5px;
+    border: solid 1px #e8eef4;
+}
+
+table th {
+    padding: 6px 5px;
+    text-align: left;
+    background-color: #e8eef4;
+    border: solid 1px #e8eef4;
+}
+
+/* MISC  
+----------------------------------------------------------*/
+.clear {
+    clear: both;
+}
+
+.error {
+    color: Red;
+}
+
+nav, 
+#menucontainer {
+    margin-top: 40px;
+    position: absolute;
+}
+
+nav
+{
+    width: 100px;
+    border-style:solid;
+    border-top: none;
+    border-bottom: none;
+    border-left: none;
+    border-right:1px solid #cccccc;
+}
+
+div#title {
+    display: block;
+    float: left;
+    text-align: left;
+    width: 100%;
+}
+
+#logindisplay {
+    font-size: 1.1em;
+    display: block;
+    text-align: right;
+    margin: 10px;
+}
+
+#logindisplay a:link {
+    text-decoration: underline;
+}
+
+#logindisplay a:visited {
+    text-decoration: underline;
+}
+
+#logindisplay a:hover {
+    text-decoration: none;
+}
+
+/* Styles for validation helpers
+-----------------------------------------------------------*/
+.field-validation-error {
+    color: #ff0000;
+}
+
+.field-validation-valid {
+    display: none;
+}
+
+.input-validation-error {
+    border: 1px solid #ff0000;
+    background-color: #ffeeee;
+}
+
+.validation-summary-errors {
+    font-weight: bold;
+    color: #ff0000;
+}
+
+.validation-summary-valid {
+    display: none;
+}
+
+/* Styles for editor and display helpers
+----------------------------------------------------------*/
+.display-label, 
+.editor-label {
+    margin: 1em 0 0 0;
+}
+
+.display-field, 
+.editor-field {
+    margin: 0.5em 0 0 0;
+}
+
+.text-box {
+    width: 30em;
+}
+
+.text-box.multi-line {
+    height: 6.5em;
+}
+
+.tri-state {
+    width: 6em;
+}
+
+.Logo
+{
+    font-family: 'Lobster', Georgia, Times, serif;
+    font-size: 40px;
+    color: #040;
+
+    background: #fff;
+    filter: progid:DXImageTransform.Microsoft.gradient(GradientType=1, startColorstr='#ffffff', endColorstr='#ff8800');
+    background: -webkit-gradient(linear, left top, right bottom, from(#ffffff), to(#ff8800));
+    background: -moz-linear-gradient(left, #ffffff, #ff8800);
+    
+    height: 60px;
+    margin-top: -30px;
+    padding-left: 30px;
+    width: 100%;
+}
+
+.actor-image-medium 
+{
+    width: 50px;
+    height: 50px;  
+    float: left;  
+}
+
+.actor-image-small
+{
+    width: 32px;
+    height: 32px;    
+}
+
+.wall-messages
+{
+    display: inline-block;
+    width: 458px;
+    max-width: 458px;
+}
+
+.message-thread
+{
+}
+
+.message-thread-author
+{
+    width: 50px;
+    margin: 4px;
+
+}
+
+.thread-conversation
+{
+    float: left;
+    max-width: 500px;
+    margin-bottom: 2px;    
+}
+
+.thread-conversation > div
+{
+    margin-left: 60px;
+}
+
+.author-name
+{
+    color: #0B5829;
+    font-weight: bold;
+    display: inline;
+    vertical-align: top;
+}
+
+.message-post
+{
+    display: block;
+    margin: 6px;
+}
+
+a
+{
+    cursor: pointer;
+    color: #3B5998;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.post
+{
+    vertical-align: top;
+    display: inline-block;
+    margin: 6px;
+}
+
+.post-link
+{
+    vertical-align: top;
+}
+
+.post-link-site
+{
+    vertical-align: top;
+    color: gray;
+}
+
+.post-info
+{
+    background-image: url('images/clock.png');
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    margin: 4px 0 0 4px;
+    height: 14px;
+}
+
+.post-info-link
+{
+    font-weight: normal;
+}
+
+.post-comment, .likeInfo
+{
+    background: #EDEFF4;
+    padding: 6px;
+    margin: 2px 0 0 0;
+}
+
+.post-message
+{
+    max-width: 442px;
+}
+
+.comment-info
+{
+    background-image: url('images/clock.png');
+    background-repeat: no-repeat;
+    padding-left: 16px;
+    margin: 2px;
+    height: 14px;
+}
+
+.comment
+{
+    vertical-align: top;
+    display: block;
+    margin: 6px 6px 6px 40px;
+    max-width: 400px;
+}
+
+.message
+{
+    vertical-align: top;
+    display: block;
+    margin: 6px 6px 6px 6px;
+    max-width: 400px;
+}
+
+
+.comment-author
+{
+    float: left;
+    display: inline;
+    width: 32px;
+    height: 32px;
+}
+
+.comment-text
+{
+    display: inline;
+    margin-left: 4px;
+}
+
+.balloonEdge
+{
+    background-image: url('images/balloonEdge.png');
+    background-repeat: no-repeat;
+    height: 10px;
+    padding: 0 0 0 12px;
+    margin: 0 0 0 12px;
+}
+
+.smallPhotoContainer
+{
+    margin: -70px 0 0 25px;
+    width: 105px;
+    background-color: White;
+    z-index: 100;
+    -webkit-border-radius: 2px;
+}
+
+.smallPhotoBorder
+{
+    display: block;
+    position: relative;
+    width: 110px;
+    height: 110px;
+    background-color: White;
+    -webkit-border-radius: 2px;
+    margin: -100px 0 0 0;
+}
+
+.smallPhoto
+{
+    display: block;
+    position: relative;
+    border: 5px solid white;
+}
+
+.nameContainer
+{
+    margin: 20px 0 0 150px;
+}
+
+.wall-loading
+{
+    margin-left: 250px;
+}
+
+.ajax-error
+{
+    background: #EDEFF4;
+    max-width: 400px;
+    border: 4px solid #CDCFD4;
+    padding: 5px;
+}
+
+.ajax-error > span
+{
+    margin: -196px 0 0 48px;
+}
+
+.comment-textarea
+{
+    width: 335px;
+    font-family: Segoe UI;
+}
+
+.message-textarea
+{
+    width: 420px;
+    height: 50px;
+    font-family: Segoe UI;
+}
+
+.comment-watermark
+{
+    width: 335px;
+    font-family: Segoe UI;
+    font-style: italic;
+    color: Gray;
+    position: absolute;
+    margin: -24px 0 0 6px;
+    display: block;
+}
+
+.likeInfo
+{
+    font-weight: bold;
+}
+
+.loading
+{
+    background-image: url('images/loading_small.gif');
+}
+
+.reply-container
+{
+    float: right;
+    width: 400px;    
+    margin-left: 50px;
+}

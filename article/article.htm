@@ -1,0 +1,709 @@
+<html>
+<head>
+    <link type="text/css" rel="stylesheet" href="CodeProject.min.css">
+</head>
+<body>
+    <div class="container-text" style="padding: 10px;max-width: 800px;">
+        <div class="text" style="padding: 10px;max-width: 800px;">
+            <p>
+                <img src="SocialNews/Screenshot.png" width="599" height="597" alt="screenshot" />
+            </p>
+            <h2>Table of Contents</h2>
+            <ul>
+                <li><a href="#Introduction">Introduction</a></li>
+                <li><a href="#SoftwareYouNeedToInstall">Software You Need To Install</a></li>
+
+                <li><a href="#ApplicationRequirements">Application Requirements</a></li>
+
+                <li><a href="#FluentNHibernate">Code First Aproach With FluentNHibernate</a></li>
+                <li><a href="#Knockout">MVVM With Knockout.js</a></li>
+                <li><a href="#SignalR">Real-Time, Multi-User Interaction With SignalR</a></li>
+
+                <li><a href="#FinalConsiderations">Final Considerations</a></li>
+                <li><a href="#History">History</a></li>
+            </ul>
+            <h2><a name="Introduction">Introduction</a></h2>
+
+            <p>Have you ever thought about creating a social network by yourself? Have you ever wondered if you could do something like 
+            Facebook using ASP.Net, C# and Javascript? In this article we are going to present some frameworks, libraries, techniques, 
+            tools and most importantly, a fully working web application that imitates some of the features of your favorite social network.</p>
+
+            <p>Beginning with <b>FluentNHibernate</b> framework, we are able to implement a clean, XML-less mapping and code-first approach 
+            for our data model. Then we carefully craft our views by applying client-side templating and MVVM binding with a little help from 
+            the awesome <b>Knockout.js</b> library. In the end, we make our <b>Social News</b> really social when we throw in the <b>SignalR</b> 
+            library to do the plumbing for our real-time event communications.</p>
+
+            <p><img src="SocialNews/thread.png" width="500" height="362" alt="thread" /></p>
+
+            <p>The result, as you can see, is a simple facebook-ish web application, which code is attached to the article. In the following lines I will 
+            explain the steps needed to build it from the scratch.</p>
+
+            <h2><a name="SoftwareYouNeedToInstall">Software You Need To Install</a></h2>
+
+            <p>To use Social News application provided with this article, you must have Visual Studio 2010 installed on your machine, or download
+            the free <a href="http://www.microsoft.com/visualstudio/en-us/products/2010-editions/visual-web-developer-express">Visual Web Developer Express</a>
+            from Microsoft website.</p>
+
+            <h2><a name="ApplicationRequirements">Application Requirements</a></h2>
+
+            <p>The application we are writing has some requirements. Basically, it's just an imitation of some well-known Facebook features, such as allowing multi-user
+            login, posting, likes and real-time communication:</p>
+
+            <ul>
+                <li><p>The application must allow a predefined number of different users. Each user must have a large wall photo, and 3 sizes of pictures
+                (large, regular and small). The picture will be stored in files outside the database, in the "images" folder.</p></li>
+                <li><p>Once logged in, the user will be shown the "wall", displaying the posts of himself/herself and from his/her friends.</p></li>
+                <li><p>The "wall" is made up by a vertical stack of posts. There will be two levels of posts: the first one is for submitted posts not related
+                with any of the previous posts. This first-level post will start a new "thread" of posts. The second-level of posts will be related to one of
+                these first-level posts, representing thus a comment or a reply to the first post or to any previous second-level post. The stack of second-level
+                posts inside a particular thread must appear indented in the thread block.</p></li>
+                <li><p>All posts must be made up by a picture of the post's author, followed by his/her name in bold font, then followed by the comment text itself,
+                and then a text informing how long that particular post have been submitted. The first-level posts should have a picture of the author of regular 
+                size, and the second-level posts should have small sized pictures.</p></li>
+                <li><p>Each post must have a "like" link that will mark that post as "liked" by the logged in user. Once the user likes a post, this information is 
+                sent to the server and persisted to the database. Also, a "like summary" is shown below the post, informing the names of the people who liked that 
+                post. Any subsequent sessions will show this "like" information to the user.</p></li>
+                <li><p>Once the user likes a post, the "like" link changes to allow the "undo" of that "like". If the user "undoes the like", this information is
+                sent again to the server, and the name of the user is removed from the "like summary" text.</p></li>
+                <li><p>Once a user likes a comment, all connected users must also see this information automatically. Likewise, not only online users, but if a user 
+                starts a session after that event, he or she also must be able to see that information.
+                </p></li>
+                <li><p>Any user must be able to post a new comment to start a new thread (first-level post).</p></li>
+                <li><p>Any user mut be able to post a new comment to an already existing thread (second-level post).</p></li>
+                <li><p>Any new post must be seen not only by the author of the post, but also by all connected users at the same time. Also,
+                if a user logs in after that event, he or she must be able to see those new posts.</p></li>
+            </ul>
+            
+
+            <h2><a name="FluentNHibernate">Code-First Aproach With FluentNHibernate and Sql Server Compact</a></h2>
+
+            <p><img src="SocialNews/FluentAndSql.png" width="600" height="98" alt="Fluent NHibernate and Sql Server Compact" /></p>
+
+            <p>In this project we will be using <b>Code First</b> approach. That is, instead of starting by building our database tables and fields first and 
+            then modelling our entire application based on it, we first create our entire model via C# code and then create our database schema based on our model
+            classes and properties. One of the advantages of this approach is that we can easily recreate the database and as many times as we want to. Thus, any
+            changes to the model will just require modification to the model classes, and then a command to recreate the database from the model. Other advantage 
+            of code first - although we are not using it in this project - is the ability to use mocks and stubs as a substitute for unit testing.</p>
+
+            <p>Code-first also means that your workflow is <b>code-centric</b>, rather than <b>designer-driven</b>. You don't need to draw anything on a designer,
+            and you don't have to craft a confusing XML file. And very often you will have a "convention over configuration" approach, that is, you don't have to
+            configure everything from scratch. The code-first framework of your choice will have conventions from which your model will benefit while generating
+            a database model.</p>
+
+            <p>Once we decide to use code first, we can pick any Object-Relational Mapping (<a href="http://en.wikipedia.org/wiki/Object-relational_mapping">ORM</a>) 
+            framework we want. On of the options is Microsoft's <a href="http://www.google.com/url?sa=t&rct=j&q=entity%20framework&source=web&cd=1&ved=0CFYQFjAA&url=http%3A%2F%2Fmsdn.microsoft.com%2Fen-us%2Fdata%2Fef.aspx&ei=AW8VUJjPNsLc6wHvs4GIDQ&usg=AFQjCNGnRYM3tghOlk7YE3qY8RyjXpulaQ">
+            Entity Framework</a>, which has been <a href="http://www.hanselman.com/blog/EntityFrameworkMagicUnicornAndMuchMoreIsNowOpenSourceWithTakeBacks.aspx">released 
+            as open source since July 19th 2012</a>. Another obvious option is the <a href="http://www.google.com/url?sa=t&rct=j&q=nhibernate&source=web&cd=1&ved=0CFcQFjAA&url=http%3A%2F%2Fwww.nhforge.org%2F&ei=p28VUNq8HYi_6AG4u4CABg&usg=AFQjCNEwmc7anDkt0PofZ_r4XPeMrioPgg">
+            NHibernate</a> framework. Both would work well, but this time I picked NHibernate as our ORM. But the problem with NHibernate is that I find tedious
+            configuring the XML files to make it work. This is why we are using <a href="http://www.fluentnhibernate.org/">Fluent NHibernate</a>, a framework 
+            maintained <a href="https://github.com/jagregory">James Gregory</a> that, as the name itself explains, is built on top of NHibernate and gives us 
+            the ability to create mappings via fluent, strongly-typed code. This enables you to check more quickly for errors, since XML files are not evaluated
+            by a compiler. Also, through fluent mapping you can avoid the verbosity that is inherent to XML configuration files. Another big advantage of
+            FluentNHibernate is that you can create abstract base classes from which your classes inherit, so you can write more concise code and avoid repetition.</p>
+
+            <p>The last piece of the data layer is our choice for database management system. The most obvious choice would be Sql Server. Sql
+            Server would work great if installed on a separated server instance, But given the fact that: 1) we would like to include the database
+            in the App_Data folder of the web application and 2) most users will be downloading the source code of this application and trying it 
+            out in their machines, choosing Sql Server might cause some errors that would require painful workarounds. In order to avoid this
+            problem, we could choose a compact, embedded database, such as <a href="http://msdn.microsoft.com/en-us/data/ff687142.aspx">Sql Server 
+            Compact</a> and <a href="http://www.sqlite.org/">SqLite</a>. These 2 databases are great for standalone applications, so they
+            perfectly work in our scenario, since we need to host a database file in our App_Data folder. In my previous experience, <b>SqLite</b> 
+            has better performance for fast inserts and some kinds of queries. But <b>Sql Server Compact</b> has a clear advantage because we can 
+            open it natively via <b>Microsoft Sql Server Management Studio</b>, which in our scenario is a plus point due to the ease of 
+            database debugging.</p>
+
+            <p>Summing up, we will use FluentNHibernate to map our object model to the relational database. Sql Server Compact will then manage a single
+            .sdf file in our App_Data folder, allowing us to use Sql Server Management Studio to easily verify the contents of the database.</p>
+
+            <p>The Social News application relies on the following simple model:</p>
+
+            <p><img src="SocialNews/model.png" width="674" height="199" alt="model" /></p>
+            
+            <p>Notice that there are only two entities, but they have more than one role:
+            <ul>
+                <li>A person submits posts</li>
+                <li>A person submits replies to posts</li>
+                <li>A person likes posts</li>
+            </ul>
+            </p>
+
+            <p>By translating that into code, we may foresee that our entities will have common atributes named <class>Id</class> and <class>CreatedOn</class>,
+            thus we can already create an abstract class from which the implementation of the entities will inherit:</p>
+
+            <pre lang="cs">
+public abstract class Entity
+{
+    public Entity()
+    {
+        CreatedOn = DateTime.Now;
+    }
+
+    public virtual int Id { get; set; }
+    public virtual DateTime CreatedOn { get; set; }
+}
+            </pre>
+
+            <p>The <class>Author</class> entity will have the role of the user who posts messages and replies to messages, and also
+            likes messages.</p>
+
+            <pre lang="cs">
+public class Author : Entity
+{
+    public Author()
+    {
+        Messages = new List&lt;Message&gt;();
+    }
+
+    public virtual string Login { get; set; }
+    [ScriptIgnore]
+    public virtual string Password { get; set; }
+    public virtual string Name { get; set; }
+    [ScriptIgnore]
+    public virtual IList&lt;Message&gt; Messages { get; set; }
+    public virtual string MediumPicturePath
+    {
+        get { return string.Format("/Content/images/actor{0}_medium.gif", Id); }
+    }
+    public virtual string SmallPicturePath
+    {
+        get { return string.Format("/Content/images/actor{0}_small.gif", Id); }
+    }
+
+    public virtual Message AddMessage(Message message)
+    {
+        message.Author = this;
+        message.NrOrder = Messages.Count() + 1;
+        Messages.Add(message);
+        return message;
+    }
+
+    ...
+}
+            </pre>
+
+            <p>Notice from the code above that the author has a list of messages, and also has an <class>AddMessage</class> method to
+            add messages. This method is implemented because we shouldn't add messages directly to the <class>Messages</class> list. Instead
+            we call <class>AddMethod</class>, because it has additional code that must be processed (setting the message's author and
+            ordering the new message inside the messages list).</p>
+
+            <p>Next, we implement the <class>Message</class> class that play the role for both posts and replies. Notice that it holds a list
+            of messages (replies) and another list for likes (i.e. the people who liked the message).</p>
+
+            <pre lang="cs">
+public class Message :  Entity
+{
+    public Message()
+    {
+        Messages = new List&lt;Message&gt;();
+        Likes = new List&lt;Author&gt;();
+    }
+
+    public virtual int NrOrder  { get; set; }
+    public virtual Author Author { get; set; }
+    [ScriptIgnore]
+    public virtual Message ParentMessage { get; set; }
+    public virtual string Text { get; set; }
+    public virtual IList&lt;Message&gt; Messages { get; set; }
+    public virtual IList&lt;Author&gt; Likes { get; set; }
+
+    public virtual Message AddMessage(Message message)
+    {
+        message.ParentMessage = this;
+        Messages.Add(message);
+        return message;
+    }
+
+    public virtual Message AddMessage(Author author, Message message)
+    {
+        message.Author = author;
+        message.ParentMessage = this;
+        message.NrOrder = Messages.Count() + 1;
+        Messages.Add(message);
+
+        author.Messages.Add(message);
+        return message;
+    }
+
+    public virtual Author AddLike(Author author)
+    {
+        Likes.Add(author);
+        return author;
+    }
+}
+            </pre>
+
+            <p>Once we have our model classes in place, we now start creating the NHibernate mappings for them. Remember that
+            we are not creating any XML configuration for this, because it's all in code. First, we implement an abstract map class
+            from which the other map classes will inherit. The <class>BaseMap</class> class will map only the base entity class
+            attributes:</p>
+
+            <pre lang="cs">
+public abstract class BaseMap&lt;T&gt; : ClassMap&lt;T&gt; where T : Entity
+{
+    public BaseMap()
+    {
+        Id(x =&gt; x.Id);
+        Map(x =&gt; x.CreatedOn);
+    }
+}
+            </pre>
+
+            <p>The code above is obviously clear and nicely readable. Also, a simple example of fluent imperative mapping, yet a very 
+            powerful one:
+                <ul>
+                    <li>The <b>Id(x =&gt; x.Id)</b> instruction tells FluentNHibernate that the entity will have
+                    an identity (the <class>Id</class> attribute specified in the lambda expression) that is mapped to an identity 
+                    field in the database.</li>
+                    <li>The <b>Map(x =&gt; x.CreatedOn)</b> instruction tells FluentNHibernate that the <class>CreatedOn</class>
+                    attribute is mapped to a regular table field (that is, non-key field).</li>
+                </ul>
+            </p>
+
+            <p>The <class>AuthorMap</class> contains the mappings for the <class>Author</class> class and inherits from the <class>
+            BaseMap</class> class. This way we can reuse code and avoid repetition. The <class>AuthorMap</class> also has <b>Map</b>
+            instructions taking lambda expressions for each of the entities not included in the base map class (Name, Login, Password).</p>            
+            
+            <p>The new instruction <b>HasMany</b>, takes the <class>Messages</class> in the lambda expression. Notice that when
+            you have a list attribute like <b>Messages</b>, you must use <b>HasMany</b> to map it, and that's why it can't be mapped 
+            by the <b>Map</b> instruction.</p>
+
+            <p>The <b>.Cascade.All()</b> instruction tells FluentNHibernate that all modification operations made to the <class>Author</class>
+            entity (update, save, delete) must be propagated to the <class>Messages</class> list. That is, when you delete an author, his/
+            her messages will be deleted.</p>
+
+            <p>The <b>.Inverse()</b> instruction tells FluentNHibernate that the <b>Other</b> entity (that is, the <class>Message</class>
+            entity) contains the association. This makes sense: if you think in terms of a relational data base, you don't have a table named
+            <b>Author</b> containing a <b>Message</b> attribute. Instead, you will have a <b>Message</b> attribute containing an <b>author_id</b>
+            attribute.</p>
+
+            <pre lang="cs">
+public class AuthorMap : BaseMap&lt;Author&gt;
+{
+    public AuthorMap()
+    {
+        Map(x =&gt; x.Name);
+        Map(x =&gt; x.Login);
+        Map(x =&gt; x.Password);
+        HasMany(x =&gt; x.Messages)
+            .Cascade.All()
+            .Inverse();
+    }
+}
+            </pre>
+
+            <p>The <class>MessageMap</class> class is similar to the <class>AuthorMap</class> class, but with some instructions we haven's seen
+            before:</p>
+
+            <p>The <b>.Length(1000)</b> method defines the maximum length for the <b>Text</b> attribute.</p>
+
+            <p>The special instruction <b>References</b> tells NHibernate to create foreign keys with defined names: "ParentMessage_id" and "Author_id".</p>
+
+            <pre lang="cs">
+public class MessageMap : BaseMap&lt;Message&gt;
+{
+    public MessageMap()
+    {
+        Map(x =&gt; x.Text).Length(1000);
+        Map(x =&gt; x.NrOrder);
+        References(x =&gt; x.ParentMessage, "ParentMessage_id");
+        References(x =&gt; x.Author, "Author_id");
+        HasMany(x =&gt; x.Messages)
+            .Cascade.All()
+            .Inverse()
+            .OrderBy("NrOrder");
+    }
+}
+            </pre>
+
+            <p>Now that we already have our model and mappings, we must create the database from it. The configuragion in web.config for Sql Server Compact
+            is not that different from the configuration from Sql Server:</p>
+
+<pre lang="xml">
+  &lt;connectionStrings&gt;
+    &lt;add name="connectionString" connectionString="Data Source=|DataDirectory|\SocialNews.sdf"
+        providerName="Microsoft.SqlServerCe.Client.3.5" /&gt;
+  &lt;/connectionStrings&gt;
+</pre>
+
+            <p>Also, we some configuration is needed in order to tell <b>FluentNHibernate</b> the assembly where the mapping classes are located:</p>
+
+<pre lang="xml">
+  &lt;appSettings&gt;
+    ...
+
+    &lt;add key="AssemblyWithFluentNHibernateMappings" value="SocialNews.Domain"/&gt;
+  &lt;/appSettings&gt;
+</pre>
+
+            <p>Now that we have everything in place, let's get started. First, there is a <class>DBHelper</class> class with a main entry method
+            called <class>Generate</class>. As you might suspect, this method generates both the database structure and the initial data (such as 
+            application users and some fake data. But for now let's skip the code involved with the generation of the initial data, and focus on 
+            the table structure generation. Notice that the <class>Generate</class> method obtains a factory isntance through the <class>CreateSessionFactory</class>
+            method, then opens a session in that factory instance. At this point, the database structure was already generated (we'll talk more
+            about this later on). And finally, a transaction is started in that open session to populate the database with startup data:</p>
+
+<pre lang="cs">
+    public class DBHelper
+    {
+        public static void Generate()
+        {
+            // create our NHibernate session factory
+            var sessionFactory = CreateSessionFactory();
+
+            using (var session = sessionFactory.OpenSession())
+            {
+                // populate the database
+                using (var transaction = session.BeginTransaction())
+                {
+                    //HERE GOES MANY LINES INSERTING DATA INTO THE DATABASE, BUT THEY 
+                    //WERE REMOVED FOR THE SAKE OF READABILITY FOR THE ARTICLE USERS.
+                }
+            }
+        }
+        .
+        .
+        .
+</pre>
+
+            <p>The <class>CreateSessionFactory</class>, as mentioned before, creates the database schema. Notice that it takes the configuration
+            settings we already defined earlier, along with the information about our mapping classes. Finally it returns an <class>ISessionFactory</class>
+            instance from which our transactions can be started:</p>
+
+<pre lang="cs">
+    public class DBHelper
+    {
+        .
+        .
+        .
+        private static ISessionFactory CreateSessionFactory()
+        {
+            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["connectionString"].ToString();
+
+            return Fluently.Configure()
+                .Database(MsSqlCeConfiguration.Standard
+                    .ConnectionString(connectionString))
+                .Mappings(m =&gt;
+                    m.FluentMappings.AddFromAssemblyOf&lt;SocialNews.Domain.Model.Author&gt;())
+                .ExposeConfiguration(BuildSchema)
+                .BuildSessionFactory();
+        }
+
+        private static void BuildSchema(Configuration config)
+        {
+            // this NHibernate tool takes a configuration (with mapping info in)
+            // and exports a database schema from it
+            new SchemaExport(config)
+                .Create(false, true);
+        }
+
+        public static FluentNHibernate.Automapping.AutoPersistenceModel CreateAutomappings { get; set; }
+    }
+</pre>
+
+            <p>Notice this snippet was designed to work with <b>Sql Server Compact</b>. This is defined by these lines:</p>
+
+<pre lang="cs">
+                .Database(MsSqlCeConfiguration.Standard
+                    .ConnectionString(connectionString))
+</pre>
+
+            <p>Likewise, if you want to work with a diffent database engine, you should use different configuration classes
+            (such as <class>MsSqlConfiguration</class> for Sql Server, <class>SQLiteConfiguration</class> fro SQLite, <class>OracleClientConfiguration</class> 
+            for Oracle, or <class>MySQLConfiguration</class> for MySql).</p>
+
+            <h2><a name="Knockout">MVVM With Knockout.js</a></h2>
+
+            <p><img src="SocialNews/knockout.png" width="395" height="115" alt="knockout" /></p>
+
+            <p>If you have worked with <a href="http://en.wikipedia.org/wiki/Extensible_Application_Markup_Language">XAML (eXtensible Application Markup Language)</a>
+            applications (such as Silverlight, WPF, WinRT and so on), there must be a good chance you also had contact 
+            with <a href="http://en.wikipedia.org/wiki/Model_View_ViewModel">MVVM (Model-View-ViewModel)</a> architectural pattern. MVVM allows you to create 
+            your user interface and then bind it to the an underlying "view model". The "view model", in its turn, is usually a class containing properties and 
+            methods which are exposed and "wired up" to the user interface by the MVVM framework, using specially designed markup attributes positioned in elements 
+            of the view markup.</p>
+
+            <p>The <a href="http://knockoutjs.com/">Knockout Js</a> is a library which has its own MVVM engine, just like Silverlight and WPF. The difference is that KnockoutJs
+            is a javascript library, intended to work with HTML. KnockoutJs <a href="http://blog.stevensanderson.com/2011/12/21/knockout-2-0-0-released/">was created 
+            by Microsoft developer</a> Steven Sanderson, who is also author of Asp.Net MVC books and has long been involved in .Net development.</p>
+
+            <p>Long story short: if you have been previously a Silverlight/WPF developer and you also work with HTML/javascript, you <b>must learn KnockoutJs and give
+            it a try</b>. It's the natural way of doing things. If you like MVVM on Silverlight/WPF, you will probably love MVVM on KnockoutJs. I'm saying this because
+            unlike C#, javascript is a script language, and this means that KnockoutJs has a very rich and flexible binding. Unlike MVVM on Silverlight/WPF, you don't 
+            have to create binding converters in KnockoutJs. You can create expressions directly in the HTML binding attributes, because it's just javascript code that
+            will be evaluated and executed by the Knockout MVVM engine.</p>
+
+            <p>Here's the key features of KnockoutJs:
+                <ul>
+                    <li>It tracks your data and synchronizes it with the UI through two-way binding. What you see in your UI is what you get in the data model. What you 
+                    see in your data model is what you get in the UI.</li>
+                    <li>Allows for nested binding, that is, you can bind a UI section to a <class>Order</class> object and bind a subsequent UI section to a child
+                    <class>OrderItem</class> array. While on the child UI section, you can also easily bind to the parent object's properties.</li>
+                    <li>You can easily create custom behaviors and reuse them as you will.</li>
+                    <li>It's pure javascript, so it doesn't depend on any javascript framework. Use it with jquery, mootools, prototype js, dojo or whathever framework
+                    you want.</li>
+                    <li>It can be added to your existing aplications without great architectural changes</li>
+                    <li>Very lightweight.</li>
+                    <li>Works on any mainstream browser</li>
+                </ul>
+            </p>
+
+            <p>Knockout Js is an <a href="http://knockoutjs.com/documentation/introduction.html">incredibly well documented library</a>. I wish all libraries and frameworks
+            I've ever used were as well documented as that. Another compelling reason to use KnockoutJs is the ability to create pure javascript underlying view models, 
+            and these view models can be totally view-agnostic. If you modify your model, the HTML UI will change accordingly. And if you modify input values on the HTML UI, 
+            your model will change automatically. Notice that this has a huge implication: it means that your javascript code doesn't need to know anything about your HTML 
+            view. It also automatically means that you can reuse the same view model in different types of views. Another big implication is that you don't have to manipulate
+            DOM elements from your javascript code anymore. I'm sure you will agree with me that this is always painful (no matter which javascript framework you
+            use - Prototype, jQuery, MooTools, etc.), especially when the UI is complex.</p>
+
+            <p>Now let's see how our project takes advantage of KnockoutJs: first, our home page at <b>Index.cshtml</b> has a reference to <b>KnockoutJs</b>
+            javascript file: </p>
+
+<pre lang="xml">
+&lt;script src="@Url.Content("~/Scripts/knockout-2.1.0.js")" type="text/javascript"&gt;&lt;/script&gt;
+</pre>
+
+            <p>But before calling anything related to <b>KnockoutJs</b>, we create our view. Of course almost every KnockoutJs article out there will tell you to
+            create the <b>ViewModel</b> first and then adapt the HTML view to your needs, but I'll do it the other way around, because I assume that most web projects 
+            begin with a mockup HTML made by the developer itself or some web designer. So, it feels natural to me to begin with the HTML and adapt the ViewModel to
+            the view needs. Of course it's a incremental process, so we will do it at separated steps and refine both our ViewModel and View each time we complete an
+            iteration. So, let's create the view with some fake data, without taking <b>KnockoutJs</b> into consideration. Since our view is quite large, let's just 
+            work with a tiny fraction of it:</p>
+
+<pre lang="xml">
+    &lt;div&gt;What's up, guys?&lt;/div&gt;
+</pre>
+
+            <p>Obvisously, the <b>"What's up, guys?"</b> refers to the <class>Text</class> property in the <class>Message</class> entity. So, the
+            binding for this single line will be:</p>
+
+<pre lang="xml">
+    &lt;div data-bind="text: text"&gt;&lt;/div&gt;
+</pre>
+            <p>See that <b>data-bind</b> attribute we've just inserted? That's the magic atribute that turns KnockoutJs into reality. The left-side
+            <b>text</b> word is a reserved word of KnockoutJs that means the contents of the div, and the right-side <b>text</b> word is the name
+            of the ViewModel property which is being bound.</p>
+
+            <p>A <b>ViewModel</b> is the intermediate between UI and the Model. It's not the UI, and it's not the model either. Instead,
+            it's a pure code implementation that exposes the model data to the UI, and also exposes the commands and events that are to be bound
+            to UI elements.</p>
+
+            <p>But how do we create the ViewModel? The <class>text</class> is one of the elements that are being bound to the View, and obviously
+            there are many more. But let's suppose we only had that like in our HTML. Our ViewModel would also be very simple:</p>
+
+<pre lang="javascript">
+var viewModel = function () {
+    var self = this;
+    self.text = ko.observable('What''s up, guys?');
+};
+ko.applyBindings(new viewModel());
+</pre>
+
+            <p>Notice that <class>text</class> is not an ordinary property. Instead, it's an <b>observable</b> property generated by KnockoutJs
+            engine, and predefined with the intial value "What's up, guys?". First of all, an <b>observable</b> is a special Javascript object
+            that wraps a value and notify subscribers whenever the underlying data changes. That is, when our observable is set to "'What''s up, 
+            guys?'", the <b>data-bind="text: text"</b> binding we saw before is notified, and consequently the <class>div</class> element contents 
+            on the UI side is automatically changed to that same value.</p>
+
+            <p>And finally, we have the magic command <b>applyBindings</b> which sets up all the bindings we've built before:</p>
+
+<pre lang="javascript">
+ko.applyBindings(new viewModel());
+</pre>
+
+            <p>When you apply the bindings, you finally get the rendered div element:</p>
+
+<pre lang="xml">
+    &lt;div data-bind="text: text"&gt;What's up, guys?&lt;/div&gt;
+</pre>
+
+            <p>Although <class>text</class> is a plain property in <class>Message</class> class, you can also access properties
+            inside nested objects such as the author's name:</p>
+
+<pre lang="xml">
+    &lt;div class="author-name" data-bind="text: author().Name"&gt;
+    &lt;/div&gt;
+</pre>
+
+            <p>For that part of the binding to work, the <class>author</class> must be a new <b>observable</b> inside the
+            <class>Message</class> object:</p>
+
+            <pre lang="javascript">
+            var Message = function (id, text, author, createdOn, replies, likes) {
+            var self = this;
+
+            self.id = ko.observable(id);
+            self.text = ko.observable(text);
+            self.author = ko.observable(author);
+            .
+            .
+            .
+            </pre>
+
+            <p>Which will in turn give:</p>
+
+<pre lang="xml">
+    &lt;div class="author-name" data-bind="text: author().Name"&gt;Penny&lt;/div&gt;
+</pre>
+
+            
+
+            <p>Another interesting feature of KnockoutJs is the ability to perform <b>foreach</b> loops using lists or collections
+            of objects, such as the <class>Messages</class> in the user's "wall". In this case we can put the <b>foreach</b> binding 
+            as a wrapper comment outside the actual HTML section being repeated over the messages list. Notice that we must prefix
+            the opening comment with <b>ko</b> and the closing comment with its counterpart <b>/ko</b>:</p>
+
+<pre lang="xml">
+    &lt;div class="wall-messages" style="display: none;"&gt;
+        &lt;!-- ko foreach: messages--&gt;
+        &lt;div class="message-thread"&gt;
+            &lt;div class="message-thread-author"&gt;
+            .
+            .
+            .
+                &lt;div class="author-name" data-bind="text: author().Name"&gt;
+                &lt;/div&gt;
+            .
+            .
+            .
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;!-- /ko --&gt;
+    &lt;/div&gt;
+</pre>
+            <p>Sometimes you will need to generate attributes based on you ViewModel. In this case, the syntax is slightly different. The
+            binding for attributes is given by the form: <b>data-bind="attr: {<i>attribute-name: value}</i></b>". So, a binding like...</p>
+
+<pre lang="xml">
+&lt;div class="thread-conversation" data-bind="attr: {threadConversationMessageId: id}"&gt;&lt;&gt;
+</pre>
+
+            <p>..., if related to a message with ID = 5 will be rendered as:</p>
+
+<pre lang="xml">
+&lt;div class="thread-conversation" data-bind="attr: {threadConversationMessageId: id}" 
+threadConversationMessageId="5"&gt;&lt;&gt;
+</pre>
+
+            <p>Another handy feature of KnockoutJS is the ability to work with conditionals. Suppose you wanted to show a <b>div</b> element
+            containing an animated loading gif to give users a visual feedback whenever your application start a long ajax request:</p>
+
+<pre lang="xml">
+    &lt;span&gt;
+        &lt;img src="../../Content/images/loading_small.gif" /&gt;
+    &lt;/span&gt;
+</pre>
+
+            <p>It would work nicely, but from the moment the ajax request returned a value, you would like the animated gif to go away. In
+            traditional ways, you would use your favorite javascript framework to access the DOM element containing the "loading" image, and
+            then change the style to hidden, or to remove the DOM element right away. That would work, but KnockoutJs allows us to do the same
+            job without messing with DOM elements. Instead, we just use <b>conditionals</b>, much like a programming language, to show or hide
+            DOM elments based on a condition expression:</p>
+
+<pre lang="xml">
+    &lt;!-- ko if: $parent.isLoading --&gt;
+    &lt;span&gt;
+        &lt;img src="../../Content/images/loading_small.gif" /&gt;
+    &lt;/span&gt;
+    &lt;!-- /ko --&gt;
+</pre>
+
+            <p>Now it seems clear that the contained elements are shown only when the <class>isLoading</class> property of the <b>parent</b>
+            object has the value <b>true</b>. The special name <b>$parent</b> allows you to access <b>ancestors</b>, that is, when KnockoutJs
+            is rendering a <class>Message</class> inside a list of messages, the <b>$parent.isLoading</b> name will refer to the <class>isLoading</class>
+            property of the object that actually contains the list of messages.</p>
+
+
+<pre lang="xml">
+&lt;div&gt;
+    &lt;span&gt;&lt;img src="/Content/images/actor5_medium.gif"&gt;&lt;/span&gt;
+    &lt;div&gt;
+        &lt;div&gt;Penny&lt;/div&gt;
+        &lt;div&gt;What's up, guys?&lt;/div&gt;
+        &lt;div&gt;
+            &lt;span &gt;7 days ago&lt;/span&gt; · 
+            &lt;span &gt;&lt;/span&gt;
+            &lt;span&gt;
+                &lt;a href="javascript:void(0);" &gt;Like&lt;/a&gt;
+                &lt;a href="javascript:void(0);" &gt;Like (Undo)&lt;/a&gt;
+            &lt;/span&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div&gt;&lt;/div&gt;
+    &lt;div&gt;
+        &lt;div&gt;
+            &lt;a href="#"&gt;
+                &lt;label title="Like this item"&gt;
+                &lt;/label&gt;
+            &lt;/a&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;div&gt;
+            &lt;div&gt;
+                &lt;img src="/Content/images/actor1_small.gif"&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;div&gt;Leonard Hofstadter&lt;/div&gt;
+                &lt;div&gt;We're creating a new social network, Penny. 
+                We're the new Mark Zuckerbergs!&lt;/div&gt;
+                &lt;br&gt;
+                &lt;span &gt;7 days ago&lt;/span&gt; · 
+                &lt;span &gt;&lt;/span&gt;
+                &lt;span&gt;
+                    &lt;a href="javascript:void(0);" &gt;Like&lt;/a&gt;
+                    &lt;a href="javascript:void(0);" &gt;Like (Undo)&lt;/a&gt;
+                &lt;/span&gt;
+                &lt;div&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;div&gt;
+            &lt;div&gt;
+                &lt;img src="/Content/images/actor5_small.gif"&gt;
+            &lt;/div&gt;
+            &lt;div&gt;
+                &lt;input&gt;
+                &lt;span&gt;Type in a comment here...&lt;/span&gt;
+                &lt;br&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</pre>
+
+            <h2><a name="SignalR">Real-Time, Multi-User Interaction With SignalR</a></h2>
+
+            <p><img src="SocialNews/SignalR.png" width="161" height="161" alt="SignalR" /></p>
+
+            <p>Our Social News application will need to listen to changes in the current thread conversation (e.g. when someone posts a new message, a new comment or 
+            when they like some post) and promptly update the user's view when the change is done.</p>
+
+            <p>This requirement calls for some kind of two-way communication, and here we have some options. The ultimate and most efficient solution would be 
+            creating a communication via <a href="http://en.wikipedia.org/wiki/WebSockets">HTML5 WebSockets</a>. The WebSockets communication works by sending and
+            receiving messages (instead of bytes) through established bi-directional, full-duplex channels over a TCP connection. The advantage is that since it's a
+            TCP communication over the port number 80, it doesn't get blocked by firewalls. But unfortunately, given the current browser support for HTML5 WebSockets, 
+            that would leave Internet Explorer out of the list.</p>
+
+            <p>The other option would be creating the communication that emulates this real-time two-way communication, using a asynchronous signalling library like
+            <a href="http://signalr.net">SignalR</a>, created by Microsoft gentlemen David Fowler and Damian Edwards. If you look at WebSockets as a low-level 
+            implementation, then you can see SignalR as an abstraction over that implementation. If the web browser implements WebSockets, SignalR will use it,
+            otherwise it will resort to a fallback technique known as <a href="http://en.wikipedia.org/wiki/Long_polling#Long_polling">long polling</a>. Long Polling
+            works by opening a connection between client and server, and passing messages through that connection. If the connection is broken, SignalR reopens the
+            another long polling connection behind the scenes, which is transparent for both the client and server involved. Obviously is less efficient than 
+            WebSockets, but works great and allows cross-browser applications.</p>
+
+            <p></p>
+
+            <h2><a name="FinalConsiderations">Final Considerations</a></h2>
+
+            <p></p>
+
+            <h2><a name="History">History</a></h2>
+            <ul>
+                <li>2012-05-31: Initial version.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

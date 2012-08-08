@@ -1,0 +1,140 @@
+﻿@model SocialNews.Domain.Model.Author
+@{
+    ViewBag.Title = "Social News";
+}
+
+@section Scripts {
+    <script src="@Url.Content("~/Scripts/jquery.signalR-0.5.2.js")" type="text/javascript"></script>
+    <script src="@Url.Content("/signalr/hubs")"></script>
+    <script src="@Url.Content("~/Scripts/social.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/knockout-2.1.0.js")" type="text/javascript"></script>
+    <script type="text/javascript">
+        var userInfo = {
+            Id: @ViewData.Model.Id,
+            Name: '@ViewData.Model.Name',
+            SmallPicturePath: '@ViewData.Model.SmallPicturePath',
+            MediumPicturePath: '@ViewData.Model.MediumPicturePath'
+        };
+        window.userInfo = userInfo;
+    </script>
+}
+
+<div class="photoContainer">
+    <div class="largePhotoContainer">
+        <img src="@Url.Content("~/Content/images/Background" + @ViewData.Model.Id + ".jpg")" width="1024" height="256" class="largePhoto" />
+    </div>
+    <h2 class="nameContainer">@ViewData.Model.Name</h2>
+    <div class="smallPhotoContainer">
+        <div class="smallPhotoBorder">
+            <img src="@Url.Content("~/Content/images/actor" + @ViewData.Model.Id + "_large.gif")" width="100" height="100" class="smallPhoto" />
+        </div>
+    </div>    
+</div>
+<p>
+    <img src="@Url.Content("~/Content/images/facebook-loading.gif")" class="wall-loading" id="loading-wall-messages" />
+    <div class="ajax-error" style="display: none;"><img src="/Content/images/exclamation.png" width="32" height="32"/><span>We are having trouble getting the data right now. Refresh your browser and try again.</span></div>
+    <!-- ko if: $root.isSignalREnabled -->
+        <div class="post-comment post-message">
+            <div class="message">
+                <textarea class="message-textarea" data-bind="value: newComment, valueUpdate: 'afterkeydown', event: { keypress: commentKeypress, focus: commentFocus, blur: commentFocusout, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }"></textarea>
+                <span class="comment-watermark" data-bind="style: {display: showCommentWatermark() ? '' : 'none'}, event: { click: commentClick, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }">What's on your mind?</span>
+                <br />
+            </div>
+        </div>
+    <!-- /ko -->
+    
+    <div class="wall-messages" style="display: none;">
+        <!-- ko foreach: messages-->
+        <div class="message-thread">
+            <div class="message-thread-author">
+            </div>
+            <div class="thread-conversation" data-bind="attr: {threadConversationMessageId: id}">
+                <span><img data-bind="attr: {src: '/Content/images/actor' + author().Id + '_medium.gif'}" class="actor-image-medium" /></span>
+                <div>
+                    <div class="author-name" data-bind="text: author().Name">
+                    </div>
+                    <div class="comment-text" data-bind="text: text">
+                    </div>
+                    <div class="post-info">
+                        <span data-bind="text: timeEllapsed"></span> · 
+                        <span data-bind="ifnot: $parent.isSignalREnabled">
+                            <img src="../../Content/images/loading_small.gif" />
+                        </span>
+                        <!-- ko if: $parent.isSignalREnabled -->
+                        <span>
+                            <a href="javascript:void(0);" class="post-info-link like" 
+                            data-bind="style: { display: likedByThisUser() ? 'none' : ''},
+                            click: addLike">Like</a>
+                            <a href="javascript:void(0);" class="post-info-link unlike"  
+                            data-bind="style: { display: likedByThisUser() ? '' : 'none'},
+                            click: unlike">Like (Undo)</a>
+                        </span>
+                        <!-- /ko -->
+                    </div>
+                </div>
+                <div class="balloonEdge"></div>
+                <div class="balloonBody">
+                    <div class="UIImageBlock clearfix">
+                        <a class="likeIconLabel" href="#" tabindex="-1" aria-hidden="true">
+                            <label class="likeIconLabel" title="Like this item" onclick="this.form.like.click();">
+                            </label>
+                        </a>
+                        <!-- ko if: likes().length > 0 -->
+                            <div class="likeInfo" 
+                            data-bind="text: likeSummary,
+                            style: {display: likeSummary().trim().length > 0 ? '' : 'none'}">
+                            </div>
+                        <!-- /ko -->
+                    </div>
+                </div>
+                <div class="reply-container">
+                    <!-- ko foreach: messages -->
+                    <div class="post-comment">
+                        <div class="comment-author">
+                            <img data-bind="attr: {src: '/Content/images/actor' + author().Id + '_small.gif'}" class="actor-image-small" />
+                        </div>
+                        <div class="comment" data-bind="attr: {answerId: id}">
+                            <div class="author-name" data-bind="text: author().Name">
+                            </div>
+                            <div class="comment-text" data-bind="text: text">
+                            </div>
+                            <br />
+                            <span data-bind="text: timeEllapsed"></span> · 
+                            <span data-bind="ifnot: $root.isSignalREnabled">
+                                <img src="../../Content/images/loading_small.gif" />
+                            </span>
+                            <!-- ko if: $root.isSignalREnabled -->
+                            <span>
+                                <a href="javascript:like(1);" class="post-info-link" 
+                                data-bind="style: { display: likedByThisUser() ? 'none' : ''}, click: addLike">Like</a>
+                                <a href="javascript:like(1);" class="post-info-link" 
+                                data-bind="style: { display: likedByThisUser() ? '' : 'none'}, click: unlike">Like (Undo)</a>
+                            </span>
+                            <!-- /ko -->
+                            <div class="likeInfo" data-bind="text: likeSummary,
+                            style: {display: likeSummary().trim().length > 0 ? '' : 'none'}">
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /ko -->
+                </div>
+                <!-- ko if: $root.isSignalREnabled -->
+                <div class="reply-container">
+                    <div class="post-comment">
+                        <div class="comment-author">
+                            <img src="@ViewData.Model.SmallPicturePath" class="actor-image-small" />
+                        </div>
+                        <div class="comment">
+                            <input class="comment-textarea" data-bind="value: newComment, valueUpdate: 'afterkeydown', event: { keypress: commentKeypress, focus: commentFocus, blur: commentFocusout, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }"/>
+                            <span class="comment-watermark" data-bind="style: {display: showCommentWatermark() ? '' : 'none'}, event: { click: commentClick, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }">Type in a comment here...</span>
+                            <br />
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </div>
+        <!-- /ko -->
+        <br />
+    </div>
+</p>
