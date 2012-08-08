@@ -5,8 +5,10 @@
 <body>
     <div class="container-text" style="padding: 10px;max-width: 800px;">
         <div class="text" style="padding: 10px;max-width: 800px;">
+
+
             <p>
-                <img src="SocialNews/Screenshot.png" width="599" height="597" alt="screenshot" />
+                <img src="Screenshot.png" width="599" height="597" alt="screenshot" />
             </p>
             <h2>Table of Contents</h2>
             <ul>
@@ -33,7 +35,7 @@
             the awesome <b>Knockout.js</b> library. In the end, we make our <b>Social News</b> really social when we throw in the <b>SignalR</b> 
             library to do the plumbing for our real-time event communications.</p>
 
-            <p><img src="SocialNews/thread.png" width="500" height="362" alt="thread" /></p>
+            <p><img src="thread.png" width="500" height="362" alt="thread" /></p>
 
             <p>The result, as you can see, is a simple facebook-ish web application, which code is attached to the article. In the following lines I will 
             explain the steps needed to build it from the scratch.</p>
@@ -77,7 +79,7 @@
 
             <h2><a name="FluentNHibernate">Code-First Aproach With FluentNHibernate and Sql Server Compact</a></h2>
 
-            <p><img src="SocialNews/FluentAndSql.png" width="600" height="98" alt="Fluent NHibernate and Sql Server Compact" /></p>
+            <p><img src="FluentAndSql.png" width="600" height="98" alt="Fluent NHibernate and Sql Server Compact" /></p>
 
             <p>In this project we will be using <b>Code First</b> approach. That is, instead of starting by building our database tables and fields first and 
             then modelling our entire application based on it, we first create our entire model via C# code and then create our database schema based on our model
@@ -123,7 +125,7 @@
 
             <p>The Social News application relies on the following simple model:</p>
 
-            <p><img src="SocialNews/model.png" width="674" height="199" alt="model" /></p>
+            <p><img src="model.png" width="674" height="199" alt="model" /></p>
             
             <p>Notice that there are only two entities, but they have more than one role:
             <ul>
@@ -133,7 +135,7 @@
             </ul>
             </p>
 
-            <p>By translating that into code, we may foresee that our entities will have common atributes named <class>Id</class> and <class>CreatedOn</class>,
+            <p>By translating that into code, we may foresee that our entities will have common atributes named <code>Id</code> and <code>CreatedOn</code>,
             thus we can already create an abstract class from which the implementation of the entities will inherit:</p>
 
             <pre lang="cs">
@@ -149,7 +151,7 @@ public abstract class Entity
 }
             </pre>
 
-            <p>The <class>Author</class> entity will have the role of the user who posts messages and replies to messages, and also
+            <p>The <code>Author</code> entity will have the role of the user who posts messages and replies to messages, and also
             likes messages.</p>
 
             <pre lang="cs">
@@ -187,12 +189,12 @@ public class Author : Entity
 }
             </pre>
 
-            <p>Notice from the code above that the author has a list of messages, and also has an <class>AddMessage</class> method to
-            add messages. This method is implemented because we shouldn't add messages directly to the <class>Messages</class> list. Instead
-            we call <class>AddMethod</class>, because it has additional code that must be processed (setting the message's author and
+            <p>Notice from the code above that the author has a list of messages, and also has an <code>AddMessage</code> method to
+            add messages. This method is implemented because we shouldn't add messages directly to the <code>Messages</code> list. Instead
+            we call <code>AddMethod</code>, because it has additional code that must be processed (setting the message's author and
             ordering the new message inside the messages list).</p>
 
-            <p>Next, we implement the <class>Message</class> class that play the role for both posts and replies. Notice that it holds a list
+            <p>Next, we implement the <code>Message</code> class that play the role for both posts and replies. Notice that it holds a list
             of messages (replies) and another list for likes (i.e. the people who liked the message).</p>
 
             <pre lang="cs">
@@ -242,7 +244,7 @@ public class Message :  Entity
 
             <p>Once we have our model classes in place, we now start creating the NHibernate mappings for them. Remember that
             we are not creating any XML configuration for this, because it's all in code. First, we implement an abstract map class
-            from which the other map classes will inherit. The <class>BaseMap</class> class will map only the base entity class
+            from which the other map classes will inherit. The <code>BaseMap</code> class will map only the base entity class
             attributes:</p>
 
             <pre lang="cs">
@@ -260,26 +262,26 @@ public abstract class BaseMap&lt;T&gt; : ClassMap&lt;T&gt; where T : Entity
             powerful one:
                 <ul>
                     <li>The <b>Id(x =&gt; x.Id)</b> instruction tells FluentNHibernate that the entity will have
-                    an identity (the <class>Id</class> attribute specified in the lambda expression) that is mapped to an identity 
+                    an identity (the <code>Id</code> attribute specified in the lambda expression) that is mapped to an identity 
                     field in the database.</li>
-                    <li>The <b>Map(x =&gt; x.CreatedOn)</b> instruction tells FluentNHibernate that the <class>CreatedOn</class>
+                    <li>The <b>Map(x =&gt; x.CreatedOn)</b> instruction tells FluentNHibernate that the <code>CreatedOn</code>
                     attribute is mapped to a regular table field (that is, non-key field).</li>
                 </ul>
             </p>
 
-            <p>The <class>AuthorMap</class> contains the mappings for the <class>Author</class> class and inherits from the <class>
-            BaseMap</class> class. This way we can reuse code and avoid repetition. The <class>AuthorMap</class> also has <b>Map</b>
+            <p>The <code>AuthorMap</code> contains the mappings for the <code>Author</code> class and inherits from the <code>
+            BaseMap</code> class. This way we can reuse code and avoid repetition. The <code>AuthorMap</code> also has <b>Map</b>
             instructions taking lambda expressions for each of the entities not included in the base map class (Name, Login, Password).</p>            
             
-            <p>The new instruction <b>HasMany</b>, takes the <class>Messages</class> in the lambda expression. Notice that when
+            <p>The new instruction <b>HasMany</b>, takes the <code>Messages</code> in the lambda expression. Notice that when
             you have a list attribute like <b>Messages</b>, you must use <b>HasMany</b> to map it, and that's why it can't be mapped 
             by the <b>Map</b> instruction.</p>
 
-            <p>The <b>.Cascade.All()</b> instruction tells FluentNHibernate that all modification operations made to the <class>Author</class>
-            entity (update, save, delete) must be propagated to the <class>Messages</class> list. That is, when you delete an author, his/
+            <p>The <b>.Cascade.All()</b> instruction tells FluentNHibernate that all modification operations made to the <code>Author</code>
+            entity (update, save, delete) must be propagated to the <code>Messages</code> list. That is, when you delete an author, his/
             her messages will be deleted.</p>
 
-            <p>The <b>.Inverse()</b> instruction tells FluentNHibernate that the <b>Other</b> entity (that is, the <class>Message</class>
+            <p>The <b>.Inverse()</b> instruction tells FluentNHibernate that the <b>Other</b> entity (that is, the <code>Message</code>
             entity) contains the association. This makes sense: if you think in terms of a relational data base, you don't have a table named
             <b>Author</b> containing a <b>Message</b> attribute. Instead, you will have a <b>Message</b> attribute containing an <b>author_id</b>
             attribute.</p>
@@ -299,7 +301,7 @@ public class AuthorMap : BaseMap&lt;Author&gt;
 }
             </pre>
 
-            <p>The <class>MessageMap</class> class is similar to the <class>AuthorMap</class> class, but with some instructions we haven's seen
+            <p>The <code>MessageMap</code> class is similar to the <code>AuthorMap</code> class, but with some instructions we haven's seen
             before:</p>
 
             <p>The <b>.Length(1000)</b> method defines the maximum length for the <b>Text</b> attribute.</p>
@@ -345,10 +347,10 @@ public class MessageMap : BaseMap&lt;Message&gt;
   &lt;/appSettings&gt;
 </pre>
 
-            <p>Now that we have everything in place, let's get started. First, there is a <class>DBHelper</class> class with a main entry method
-            called <class>Generate</class>. As you might suspect, this method generates both the database structure and the initial data (such as 
+            <p>Now that we have everything in place, let's get started. First, there is a <code>DBHelper</code> class with a main entry method
+            called <code>Generate</code>. As you might suspect, this method generates both the database structure and the initial data (such as 
             application users and some fake data. But for now let's skip the code involved with the generation of the initial data, and focus on 
-            the table structure generation. Notice that the <class>Generate</class> method obtains a factory isntance through the <class>CreateSessionFactory</class>
+            the table structure generation. Notice that the <code>Generate</code> method obtains a factory isntance through the <code>CreateSessionFactory</code>
             method, then opens a session in that factory instance. At this point, the database structure was already generated (we'll talk more
             about this later on). And finally, a transaction is started in that open session to populate the database with startup data:</p>
 
@@ -375,8 +377,8 @@ public class MessageMap : BaseMap&lt;Message&gt;
         .
 </pre>
 
-            <p>The <class>CreateSessionFactory</class>, as mentioned before, creates the database schema. Notice that it takes the configuration
-            settings we already defined earlier, along with the information about our mapping classes. Finally it returns an <class>ISessionFactory</class>
+            <p>The <code>CreateSessionFactory</code>, as mentioned before, creates the database schema. Notice that it takes the configuration
+            settings we already defined earlier, along with the information about our mapping classes. Finally it returns an <code>ISessionFactory</code>
             instance from which our transactions can be started:</p>
 
 <pre lang="cs">
@@ -418,19 +420,19 @@ public class MessageMap : BaseMap&lt;Message&gt;
 </pre>
 
             <p>Likewise, if you want to work with a diffent database engine, you should use different configuration classes
-            (such as <class>MsSqlConfiguration</class> for Sql Server, <class>SQLiteConfiguration</class> fro SQLite, <class>OracleClientConfiguration</class> 
-            for Oracle, or <class>MySQLConfiguration</class> for MySql).</p>
+            (such as <code>MsSqlConfiguration</code> for Sql Server, <code>SQLiteConfiguration</code> fro SQLite, <code>OracleClientConfiguration</code> 
+            for Oracle, or <code>MySQLConfiguration</code> for MySql).</p>
 
             <p>As I said before, the good thing of using Sql Server Compact is the ability to inspect the database using <b>Sql Server Management Studio.</b>
             Just open a new connection as <b>Sql Server Compact</b> type and you can work with it much like a regular Sql Server database.</p>
 
-            <p><img src="SocialNews/connect.png" width="426" height="321" alt="sql" /></p>
+            <p><img src="connect.png" width="426" height="321" alt="sql" /></p>
 
-            <p><img src="SocialNews/sql.png" width="407" height="562" alt="sql" /></p>
+            <p><img src="sql.png" width="407" height="562" alt="sql" /></p>
 
             <h2><a name="Knockout">MVVM With Knockout.js</a></h2>
 
-            <p><img src="SocialNews/knockout.png" width="395" height="115" alt="knockout" /></p>
+            <p><img src="knockout.png" width="395" height="115" alt="knockout" /></p>
 
             <p>If you have worked with <a href="http://en.wikipedia.org/wiki/Extensible_Application_Markup_Language">XAML (eXtensible Application Markup Language)</a>
             applications (such as Silverlight, WPF, WinRT and so on), there must be a good chance you also had contact 
@@ -453,8 +455,8 @@ public class MessageMap : BaseMap&lt;Message&gt;
                 <ul>
                     <li>It tracks your data and synchronizes it with the UI through two-way binding. What you see in your UI is what you get in the data model. What you 
                     see in your data model is what you get in the UI.</li>
-                    <li>Allows for nested binding, that is, you can bind a UI section to a <class>Order</class> object and bind a subsequent UI section to a child
-                    <class>OrderItem</class> array. While on the child UI section, you can also easily bind to the parent object's properties.</li>
+                    <li>Allows for nested binding, that is, you can bind a UI section to a <code>Order</code> object and bind a subsequent UI section to a child
+                    <code>OrderItem</code> array. While on the child UI section, you can also easily bind to the parent object's properties.</li>
                     <li>You can easily create custom behaviors and reuse them as you will.</li>
                     <li>It's pure javascript, so it doesn't depend on any javascript framework. Use it with jquery, mootools, prototype js, dojo or whathever framework
                     you want.</li>
@@ -492,7 +494,7 @@ public class MessageMap : BaseMap&lt;Message&gt;
     &lt;div&gt;What's up, guys?&lt;/div&gt;
 </pre>
 
-            <p>Obvisously, the <b>"What's up, guys?"</b> refers to the <class>Text</class> property in the <class>Message</class> entity. So, the
+            <p>Obvisously, the <b>"What's up, guys?"</b> refers to the <code>Text</code> property in the <code>Message</code> entity. So, the
             binding for this single line will be:</p>
 
 <pre lang="xml">
@@ -506,7 +508,7 @@ public class MessageMap : BaseMap&lt;Message&gt;
             it's a pure code implementation that exposes the model data to the UI, and also exposes the commands and events that are to be bound
             to UI elements.</p>
 
-            <p>But how do we create the ViewModel? The <class>text</class> is one of the elements that are being bound to the View, and obviously
+            <p>But how do we create the ViewModel? The <code>text</code> is one of the elements that are being bound to the View, and obviously
             there are many more. But let's suppose we only had that like in our HTML. Our ViewModel would also be very simple:</p>
 
 <pre lang="javascript">
@@ -517,10 +519,10 @@ var viewModel = function () {
 ko.applyBindings(new viewModel());
 </pre>
 
-            <p>Notice that <class>text</class> is not an ordinary property. Instead, it's an <b>observable</b> property generated by KnockoutJs
+            <p>Notice that <code>text</code> is not an ordinary property. Instead, it's an <b>observable</b> property generated by KnockoutJs
             engine, and predefined with the intial value "What's up, guys?". First of all, an <b>observable</b> is a special Javascript object
             that wraps a value and notify subscribers whenever the underlying data changes. That is, when our observable is set to "'What''s up, 
-            guys?'", the <b>data-bind="text: text"</b> binding we saw before is notified, and consequently the <class>div</class> element contents 
+            guys?'", the <b>data-bind="text: text"</b> binding we saw before is notified, and consequently the <code>div</code> element contents 
             on the UI side is automatically changed to that same value.</p>
 
             <p>And finally, we have the magic command <b>applyBindings</b> which sets up all the bindings we've built before:</p>
@@ -535,7 +537,7 @@ ko.applyBindings(new viewModel());
     &lt;div data-bind="text: text"&gt;What's up, guys?&lt;/div&gt;
 </pre>
 
-            <p>Although <class>text</class> is a plain property in <class>Message</class> class, you can also access properties
+            <p>Although <code>text</code> is a plain property in <code>Message</code> class, you can also access properties
             inside nested objects such as the author's name:</p>
 
 <pre lang="xml">
@@ -543,8 +545,8 @@ ko.applyBindings(new viewModel());
     &lt;/div&gt;
 </pre>
 
-            <p>For that part of the binding to work, the <class>author</class> must be a new <b>observable</b> inside the
-            <class>Message</class> object:</p>
+            <p>For that part of the binding to work, the <code>author</code> must be a new <b>observable</b> inside the
+            <code>Message</code> object:</p>
 
             <pre lang="javascript">
             var Message = function (id, text, author, createdOn, replies, likes) {
@@ -567,7 +569,7 @@ ko.applyBindings(new viewModel());
             
 
             <p>Another interesting feature of KnockoutJs is the ability to perform <b>foreach</b> loops using lists or collections
-            of objects, such as the <class>Messages</class> in the user's "wall". In this case we can put the <b>foreach</b> binding 
+            of objects, such as the <code>Messages</code> in the user's "wall". In this case we can put the <b>foreach</b> binding 
             as a wrapper comment outside the actual HTML section being repeated over the messages list. Notice that we must prefix
             the opening comment with <b>ko</b> and the closing comment with its counterpart <b>/ko</b>:</p>
 
@@ -626,9 +628,9 @@ threadConversationMessageId="5"&gt;&lt;&gt;
     &lt;!-- /ko --&gt;
 </pre>
 
-            <p>Now it seems clear that the contained elements are shown only when the <class>isLoading</class> property of the <b>parent</b>
+            <p>Now it seems clear that the contained elements are shown only when the <code>isLoading</code> property of the <b>parent</b>
             object has the value <b>true</b>. The special name <b>$parent</b> allows you to access <b>ancestors</b>, that is, when KnockoutJs
-            is rendering a <class>Message</class> inside a list of messages, the <b>$parent.isLoading</b> name will refer to the <class>isLoading</class>
+            is rendering a <code>Message</code> inside a list of messages, the <b>$parent.isLoading</b> name will refer to the <code>isLoading</code>
             property of the object that actually contains the list of messages.</p>
 
             <p>Now we can compare the fake HTML with the final version of the view, and it becomes easier to spot where the KnockoutJs bindings
@@ -813,7 +815,7 @@ threadConversationMessageId="5"&gt;&lt;&gt;
 
             <h2><a name="SignalR">Real-Time, Multi-User Interaction With SignalR</a></h2>
 
-            <p><img src="SocialNews/SignalR.png" width="161" height="161" alt="SignalR" /></p>
+            <p><img src="SignalR.png" width="161" height="161" alt="SignalR" /></p>
 
             <p>Our Social News application will need to listen to changes in the current thread conversation (e.g. when someone posts a new message, a new comment or 
             when they like some post) and promptly update the user's view when the change is done.</p>
@@ -834,8 +836,8 @@ threadConversationMessageId="5"&gt;&lt;&gt;
 
             <h4><a name="Hub">Hub</a></h4>
 
-            <p>SignalR uses the concept of <class>Hub</class> to bring client-server communication methods to a central point. When you use SignalR, you will
-            inevitably need to create one or more hubs classes by inheriting from the base <class>Hub</class> class:</p>
+            <p>SignalR uses the concept of <code>Hub</code> to bring client-server communication methods to a central point. When you use SignalR, you will
+            inevitably need to create one or more hubs classes by inheriting from the base <code>Hub</code> class:</p>
 
 <pre lang="cs">
 namespace SocialNews.Hubs
@@ -851,7 +853,7 @@ namespace SocialNews.Hubs
 
             <h4><a name="ClientCallingTheServer">Client Calling the Server</a></h4>
 
-            <p>You will find it interesting the fact that all methods you put inside a <class>Hub</class> will be automatically exposed and available 
+            <p>You will find it interesting the fact that all methods you put inside a <code>Hub</code> will be automatically exposed and available 
             for the client side (javascript) code. As we are going to see later, all you have to do is to call the javascript method with the same
             on the SignalR javascript object.</p>
 
@@ -882,13 +884,13 @@ namespace SocialNews.Hubs
 
             <h4><a name="ServerCallingTheClient">Server Calling the Client</a></h4>
 
-            <p>Of course you can also make calls from server to clients, by using the <class>Clients</class> class, a dynamic object that represents all clients 
+            <p>Of course you can also make calls from server to clients, by using the <code>Clients</code> class, a dynamic object that represents all clients 
             connected to the Hub.</p>
 
-            <p>The following code illustrates what happens when some user "likes" a comment: first, the javascript code calls the <class>sendLikeToServer</class>
-            method of <class>socialHubClient</class> object, passing the message Id. When it reaches the server, it is routed to the <class>SocialHub</class>
-            class and invokes the <class>SendLikeToServer</class> method. Then the "like" information is persisted to the database, while the dynamic method
-            <class>updateLike</class> is called on the dynamic object <class>Clients</class>, and thus the "like" information is broadcast to all online 
+            <p>The following code illustrates what happens when some user "likes" a comment: first, the javascript code calls the <code>sendLikeToServer</code>
+            method of <code>socialHubClient</code> object, passing the message Id. When it reaches the server, it is routed to the <code>SocialHub</code>
+            class and invokes the <code>SendLikeToServer</code> method. Then the "like" information is persisted to the database, while the dynamic method
+            <code>updateLike</code> is called on the dynamic object <code>Clients</code>, and thus the "like" information is broadcast to all online 
             clients:</p>
 
 <pre lang="cs">
@@ -930,8 +932,8 @@ function setupHubClient() {
 
             <h4><a name="LikingAMessage">Liking a Message</a></h4>
 
-            <p>The process of "liking" a message is simple: after the user clicks the link, the <class>addLike</class> method of the
-            <class>Message</class> object is called...</p>
+            <p>The process of "liking" a message is simple: after the user clicks the link, the <code>addLike</code> method of the
+            <code>Message</code> object is called...</p>
 
 <pre lang="javascript">
     &lt;a href="javascript:void(0);" class="post-info-link like" 
@@ -961,7 +963,7 @@ function setupHubClient() {
     }
 </pre>
 
-            <p>...and now the information is sent to the <class>updateLike</class> method of the <class>socialHubClient</class> object,
+            <p>...and now the information is sent to the <code>updateLike</code> method of the <code>socialHubClient</code> object,
             which in turn looks for the affected message and updates the list of people who liked that post with this new "like" information.
             Notice that thanks to the KnockoutJs bindings, we don't need to mess with HTML directly to update the view:</p>
 
@@ -976,7 +978,7 @@ function setupHubClient() {
     };
 </pre>
 
-            <p>And here is the client request as intercepted by <b>Fiddler</b> (a HTTP debugger), when the <class>SendLikeToServer</class>
+            <p>And here is the client request as intercepted by <b>Fiddler</b> (a HTTP debugger), when the <code>SendLikeToServer</code>
             is invoked in Internet Explorer 9:</p>
 
 <p>
@@ -987,9 +989,9 @@ function setupHubClient() {
     </ul>
 </p>
 
-            <p><img src="SocialNews/SheldonLikes.png" width="600" height="600" alt="Sheldon Likes" /></p>
+            <p><img src="SheldonLikes.png" width="600" height="600" alt="Sheldon Likes" /></p>
 
-            <p>The list of people who liked a specific post is given by the <class>likeSummary</class> method. We see this method
+            <p>The list of people who liked a specific post is given by the <code>likeSummary</code> method. We see this method
             defined in some of the KnockoutJs bindings, like this:</p>
 
 <pre lang="html">
@@ -1001,7 +1003,7 @@ function setupHubClient() {
     &lt;!-- /ko --&gt;
 </pre>
 
-            <p>The <class>likeSummary</class> is implemented on the <class>Message</class> class as a special kind of object called
+            <p>The <code>likeSummary</code> is implemented on the <code>Message</code> class as a special kind of object called
             <b>computed</b>. A computed method works like an <b>observable</b>, but instead of holding a value, it is evaluated again
             whenever it is required by KnockoutJs. This is very handy in our case because we want to present a human-readable list of
             users who liked a specific post:</p>
@@ -1039,7 +1041,7 @@ function setupHubClient() {
     });
 </pre>
 
-            <p><img src="SocialNews/PennyLikes.png" width="600" height="600" alt="Penny Likes" /></p>
+            <p><img src="PennyLikes.png" width="600" height="600" alt="Penny Likes" /></p>
 
             <p>We could also talk about the process of posting a new message, but I believe it is quite similar to the process of liking a message,
             so I think that up to this point you already got the whole idea.</p>
@@ -1054,6 +1056,8 @@ function setupHubClient() {
             <ul>
                 <li>2012-08-08: Initial version.</li>
             </ul>
+
+
         </div>
     </div>
 </body>
