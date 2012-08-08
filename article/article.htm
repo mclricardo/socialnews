@@ -612,20 +612,32 @@ threadConversationMessageId="5"&gt;&lt;&gt;
             is rendering a <class>Message</class> inside a list of messages, the <b>$parent.isLoading</b> name will refer to the <class>isLoading</class>
             property of the object that actually contains the list of messages.</p>
 
-
-<pre lang="xml">
+<table width="780">
+    <tr>
+        <td>
+<pre lang="html" style="width: 380px">
 &lt;div&gt;
-    &lt;span&gt;&lt;img src="/Content/images/actor5_medium.gif"&gt;&lt;/span&gt;
+    &lt;span&gt;
+        &lt;img src="/Content/images/actor5_medium.gif"&gt;
+    &lt;/span&gt;
     &lt;div&gt;
         &lt;div&gt;Penny&lt;/div&gt;
         &lt;div&gt;What's up, guys?&lt;/div&gt;
         &lt;div&gt;
             &lt;span &gt;7 days ago&lt;/span&gt; · 
-            &lt;span &gt;&lt;/span&gt;
+            &lt;span &gt;
+                &lt;img /&gt;
+            &lt;/span&gt;
+
             &lt;span&gt;
                 &lt;a href="javascript:void(0);" &gt;Like&lt;/a&gt;
+
+
                 &lt;a href="javascript:void(0);" &gt;Like (Undo)&lt;/a&gt;
+
+
             &lt;/span&gt;
+
         &lt;/div&gt;
     &lt;/div&gt;
     &lt;div&gt;&lt;/div&gt;
@@ -635,28 +647,43 @@ threadConversationMessageId="5"&gt;&lt;&gt;
                 &lt;label title="Like this item"&gt;
                 &lt;/label&gt;
             &lt;/a&gt;
+
+
+
+
+
+
         &lt;/div&gt;
     &lt;/div&gt;
     &lt;div&gt;
+
         &lt;div&gt;
             &lt;div&gt;
                 &lt;img src="/Content/images/actor1_small.gif"&gt;
             &lt;/div&gt;
             &lt;div&gt;
                 &lt;div&gt;Leonard Hofstadter&lt;/div&gt;
-                &lt;div&gt;We're creating a new social network, Penny. 
-                We're the new Mark Zuckerbergs!&lt;/div&gt;
+                &lt;div&gt;We're creating a new social network, Penny. We're the new Mark Zuckerbergs!&lt;/div&gt;
                 &lt;br&gt;
                 &lt;span &gt;7 days ago&lt;/span&gt; · 
-                &lt;span &gt;&lt;/span&gt;
+                &lt;span &gt;
+                    &lt;img /&gt;
+                &lt;/span&gt;
+
                 &lt;span&gt;
                     &lt;a href="javascript:void(0);" &gt;Like&lt;/a&gt;
+
                     &lt;a href="javascript:void(0);" &gt;Like (Undo)&lt;/a&gt;
+
                 &lt;/span&gt;
-                &lt;div&gt;&lt;/div&gt;
+
+                &lt;div&gt;
+                &lt;/div&gt;
             &lt;/div&gt;
         &lt;/div&gt;
+
     &lt;/div&gt;
+
     &lt;div&gt;
         &lt;div&gt;
             &lt;div&gt;
@@ -669,8 +696,98 @@ threadConversationMessageId="5"&gt;&lt;&gt;
             &lt;/div&gt;
         &lt;/div&gt;
     &lt;/div&gt;
+
 &lt;/div&gt;
 </pre>
+        </td>
+        <td>
+<pre lang="html" style="width: 380px">
+&lt;div class="thread-conversation" data-bind="attr: {threadConversationMessageId: id}"&gt;
+    &lt;span&gt;
+        &lt;img data-bind="attr: {src: '/Content/images/actor' + author().Id + '_medium.gif'}" class="actor-image-medium" /&gt;
+    &lt;/span&gt;
+    &lt;div&gt;
+        &lt;div class="author-name" data-bind="text: author().Name"&gt;&lt;/div&gt;
+        &lt;div class="comment-text" data-bind="text: text"&gt;&lt;/div&gt;
+        &lt;div class="post-info"&gt;
+            &lt;span data-bind="text: timeEllapsed"&gt;&lt;/span&gt; · 
+            &lt;span data-bind="ifnot: $parent.isSignalREnabled"&gt;
+                &lt;img src="../../Content/images/loading_small.gif" /&gt;
+            &lt;/span&gt;
+            &lt;!-- ko if: $parent.isSignalREnabled --&gt;
+            &lt;span&gt;
+                &lt;a href="javascript:void(0);" class="post-info-link like" 
+                data-bind="style: { display: likedByThisUser() ? 'none' : ''},
+                click: addLike"&gt;Like&lt;/a&gt;
+                &lt;a href="javascript:void(0);" class="post-info-link unlike"  
+                data-bind="style: { display: likedByThisUser() ? '' : 'none'},
+                click: unlike"&gt;Like (Undo)&lt;/a&gt;
+            &lt;/span&gt;
+            &lt;!-- /ko --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="balloonEdge"&gt;&lt;/div&gt;
+    &lt;div class="balloonBody"&gt;
+        &lt;div class="UIImageBlock clearfix"&gt;
+            &lt;a class="likeIconLabel" href="#" tabindex="-1" aria-hidden="true"&gt;
+                &lt;label class="likeIconLabel" title="Like this item" onclick="this.form.like.click();"&gt;
+                &lt;/label&gt;
+            &lt;/a&gt;
+            &lt;!-- ko if: likes().length &gt; 0 --&gt;
+                &lt;div class="likeInfo" 
+                data-bind="text: likeSummary,
+                style: {display: likeSummary().trim().length &gt; 0 ? '' : 'none'}"&gt;
+                &lt;/div&gt;
+            &lt;!-- /ko --&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="reply-container"&gt;
+        &lt;!-- ko foreach: messages --&gt;
+        &lt;div class="post-comment"&gt;
+            &lt;div class="comment-author"&gt;
+                &lt;img data-bind="attr: {src: '/Content/images/actor' + author().Id + '_small.gif'}" class="actor-image-small" /&gt;
+            &lt;/div&gt;
+            &lt;div class="comment" data-bind="attr: {answerId: id}"&gt;
+                &lt;div class="author-name" data-bind="text: author().Name"&gt;&lt;/div&gt;
+                &lt;div class="comment-text" data-bind="text: text"&gt;&lt;/div&gt;
+                &lt;br /&gt;
+                &lt;span data-bind="text: timeEllapsed"&gt;&lt;/span&gt; · 
+                &lt;span data-bind="ifnot: $root.isSignalREnabled"&gt;
+                    &lt;img src="../../Content/images/loading_small.gif" /&gt;
+                &lt;/span&gt;
+                &lt;!-- ko if: $root.isSignalREnabled --&gt;
+                &lt;span&gt;
+                    &lt;a href="javascript:like(1);" class="post-info-link" 
+                    data-bind="style: { display: likedByThisUser() ? 'none' : ''}, click: addLike"&gt;Like&lt;/a&gt;
+                    &lt;a href="javascript:like(1);" class="post-info-link" 
+                    data-bind="style: { display: likedByThisUser() ? '' : 'none'}, click: unlike"&gt;Like (Undo)&lt;/a&gt;
+                &lt;/span&gt;
+                &lt;!-- /ko --&gt;
+                &lt;div class="likeInfo" data-bind="text: likeSummary,
+                style: {display: likeSummary().trim().length &gt; 0 ? '' : 'none'}"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+        &lt;!-- /ko --&gt;
+    &lt;/div&gt;
+    &lt;!-- ko if: $root.isSignalREnabled --&gt;
+    &lt;div class="reply-container"&gt;
+        &lt;div class="post-comment"&gt;
+            &lt;div class="comment-author"&gt;
+                &lt;img src="@ViewData.Model.SmallPicturePath" class="actor-image-small" /&gt;
+            &lt;/div&gt;
+            &lt;div class="comment"&gt;
+                &lt;input class="comment-textarea" data-bind="value: newComment, valueUpdate: 'afterkeydown', event: { keypress: commentKeypress, focus: commentFocus, blur: commentFocusout, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }"/&gt;
+                &lt;span class="comment-watermark" data-bind="style: {display: showCommentWatermark() ? '' : 'none'}, event: { click: commentClick, mouseenter: commentMouseEnter, mouseleave: commentMouseLeave }"&gt;Type in a comment here...&lt;/span&gt;
+                &lt;br /&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;!-- /ko --&gt;
+&lt;/div&gt;
+</pre>
+        </td>
+    </tr>
+</table>
 
             <h2><a name="SignalR">Real-Time, Multi-User Interaction With SignalR</a></h2>
 
