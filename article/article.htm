@@ -421,6 +421,13 @@ public class MessageMap : BaseMap&lt;Message&gt;
             (such as <class>MsSqlConfiguration</class> for Sql Server, <class>SQLiteConfiguration</class> fro SQLite, <class>OracleClientConfiguration</class> 
             for Oracle, or <class>MySQLConfiguration</class> for MySql).</p>
 
+            <p>As I said before, the good thing of using Sql Server Compact is the ability to inspect the database using <b>Sql Server Management Studio.</b>
+            Just open a new connection as <b>Sql Server Compact</b> type and you can work with it much like a regular Sql Server database.</p>
+
+            <p><img src="SocialNews/connect.png" width="426" height="321" alt="sql" /></p>
+
+            <p><img src="SocialNews/sql.png" width="407" height="562" alt="sql" /></p>
+
             <h2><a name="Knockout">MVVM With Knockout.js</a></h2>
 
             <p><img src="SocialNews/knockout.png" width="395" height="115" alt="knockout" /></p>
@@ -969,6 +976,19 @@ function setupHubClient() {
     };
 </pre>
 
+            <p>And here is the client request as intercepted by <b>Fiddler</b> (a HTTP debugger), when the <class>SendLikeToServer</class>
+            is invoked in Internet Explorer 9:</p>
+
+<p>
+    <ul>
+        <li><b>transport</b>: longPolling</li>
+        <li><b>connectionId</b>: 01dfd25e-3001-4c57-b204-392afe98b642</li>
+        <li><b>data</b>: {"hub":"SocialHub","method":"SendLikeToServer","args":[9],"state":{"Name":"Sheldon Cooper"},"id":3}</li>
+    </ul>
+</p>
+
+            <p><img src="SocialNews/SheldonLikes.png" width="600" height="600" alt="Sheldon Likes" /></p>
+
             <p>The list of people who liked a specific post is given by the <class>likeSummary</class> method. We see this method
             defined in some of the KnockoutJs bindings, like this:</p>
 
@@ -1018,6 +1038,8 @@ function setupHubClient() {
         return summary;
     });
 </pre>
+
+            <p><img src="SocialNews/PennyLikes.png" width="600" height="600" alt="Penny Likes" /></p>
 
             <p>We could also talk about the process of posting a new message, but I believe it is quite similar to the process of liking a message,
             so I think that up to this point you already got the whole idea.</p>
