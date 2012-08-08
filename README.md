@@ -1,0 +1,4 @@
+socialnews
+==========
+
+socialnews = knockoutjs + signalr
